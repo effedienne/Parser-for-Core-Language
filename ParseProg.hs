@@ -126,8 +126,11 @@ parseAExpr = do a <- isVar
               <|> do n <- int 
                      return (ENum n)
                    <|> do symbol "Pack"             
+                          symbol "{"
                           n1 <- int
+                          symbol ","
                           n2 <- int
+                          symbol "}"
                           return (EConstr n1 n2)
                         <|> do symbol "("
                                e <- parseExpr
