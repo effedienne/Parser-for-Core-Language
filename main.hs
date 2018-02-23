@@ -7,12 +7,10 @@ readF :: IO String
 readF = do inh <- openFile "input.txt" ReadMode
            prog <- readloop inh
            hClose inh
-           --print prog
            return prog
 
 main :: IO (Program Name)
 main = do inp <- readF
-          --print(comp(parse parseProg inp))
           return (comp (parse parseProg inp)) 
 
 comp :: [(Program Name, Name)] -> Program Name
