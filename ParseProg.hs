@@ -148,9 +148,8 @@ parseCase = do symbol "case"
                e <- parseExpr
                symbol "of"
                k <- parseAlt
-               mm <- many parseAlt
+               mm <- many parseOtherAlt
                return (ECase e (k:mm))
-
 
 parseAlt::Parser(Alter Name)
 parseAlt = do symbol "<"
@@ -159,14 +158,18 @@ parseAlt = do symbol "<"
               aa <- many parseVar
               symbol "->"
               e <- parseExpr 
-              symbol ";"
-              return(n,aa,e)
+              return (n,aa,e)
+
+parseOtherAlt::Parser (Alter Name)
+parseOtherAlt = do symbol ";"
+                   a <-parseAlt   
+                   return a
 
 parseLambda::Parser (Expr Name)
 parseLambda = do symbol "\\"
                  a <- parseVar
                  aa <- many parseVar
-                 symbol "." --"->"
+                 symbol "." 
                  e <- parseExpr
                  return(Elam (a:aa) e)           
 
