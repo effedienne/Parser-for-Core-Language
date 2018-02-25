@@ -32,7 +32,8 @@ sat f = do
 
 --function is alphanum is provided by Data.Char
 alphanum:: Parser Char
-alphanum =  sat isAlphaNum
+alphanum = sat isAlphaNum
+            <|> char '_'
 
 char:: Char -> Parser Char
 char x = sat (==x) 
@@ -53,16 +54,10 @@ string (x:xs) = do char x
                    string xs
                    return (x:xs)
 
-initialIdent::Parser String
-initialIdent = do x<-lower
-                  return [x]
-                <|> do x<-symbol "_"
-                       return x
-
 ident:: Parser String
-ident = do x<- initialIdent
+ident = do x <- lower
            xs <- many alphanum
-           return (x++xs)
+           return (x:xs)
 
 token::Parser a -> Parser a 
 token p = do space
@@ -183,7 +178,7 @@ parseLetrRec = do symbol "letrec"
                   e <- parseExpr
                   return(ELet Recursive (def:dd) e)
 
-parseLet::Parser (Expr Name)     --nonrecurs
+parseLet::Parser (Expr Name)
 parseLet = do symbol "let" 
               def <- parseDef 
               dd <- many parseDef 
@@ -192,22 +187,21 @@ parseLet = do symbol "let"
               return(ELet NonRecursive (def:dd) e)
 
 parseAExpr::Parser(Expr Name)
-parseAExpr =
-                   do v<-isVar
-                      return (EVar v)
-                    <|> do n <- int 
-                           return (ENum n)
-                    <|> do symbol "Pack"
-                           symbol "{"
-                           n1 <- int
-                           symbol ","
-                           n2 <- int
-                           symbol "}"
-                           return (EConstr n1 n2)
-                    <|> do symbol "("
-                           e <- parseExpr
-                           symbol ")"
-                           return e
+parseAExpr = do v<-isVar
+                return (EVar v)
+              <|> do n <- int 
+                     return (ENum n)
+              <|> do symbol "Pack"
+                     symbol "{"
+                     n1 <- int
+                     symbol ","
+                     n2 <- int
+                     symbol "}"
+                     return (EConstr n1 n2)
+              <|> do symbol "("
+                     e <- parseExpr
+                     symbol ")"
+                     return e
 
 parseDef::Parser(Def Name) 
 parseDef = do v <- parseVar 
@@ -223,9 +217,9 @@ isVar = do v <- parseVar
             else return v
 
 isKey::String->Bool
-isKey "case"  = True
-isKey "let" =True
-isKey "of"  = True
-isKey "letrec" =True
-isKey "in" =True
-isKey _ =False
+isKey "case"   = True
+isKey "let"    = True
+isKey "of"     = True
+isKey "letrec" = True
+isKey "in"     = True
+isKey _        = False

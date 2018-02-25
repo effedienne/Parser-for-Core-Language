@@ -24,22 +24,22 @@ parse::Parser a -> String -> [(a,String)]
 parse (P p) inp = p inp
 
 instance Functor Parser where
--- fmap::(a->b) ->Parser a ->Parser b
+-- fmap::(a->b) -> Parser a -> Parser b
   fmap g p = P (\i -> case parse p i of
     []              -> []
     [(v, out)]      -> [(g v, out)])
 
 instance Applicative Parser where
---pure::a->Parser a
+--pure::a -> Parser a
   pure v = P(\i -> [(v,i)]) 
 
---(<*>)::Parser(a->b)->Parser a ->Parser b
+--(<*>)::Parser(a->b) -> Parser a -> Parser b
   pg <*> px = P(\i -> case parse pg i of
                   []      -> []
                   [(v,s)] -> parse (fmap v px) s )
 
 instance Monad Parser where
---(>>=)::Parser a -> (a->Parser b)-> Parser b
+--(>>=)::Parser a -> (a->Parser b) -> Parser b
   p >>= fun = P(\i -> case parse p i of
                    []      -> []
                    [(v,s)] -> parse (fun v) s )
