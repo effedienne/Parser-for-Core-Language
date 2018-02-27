@@ -139,9 +139,11 @@ parseExpr5 = do t1 <- parseExpr6
 
 parseExpr6::Parser(Expr Name) -- EAP o aexpr
 parseExpr6 =  do a <- parseAExpr
-                 do b <- parseExpr6
-                    return (EAp a b)
-                  <|> return a
+             --    do b <- parseExpr6
+             --       return (EAp a b)
+             --     <|> return a
+                 aa <- many parseAExpr
+                 return (foldl(\a b ->(EAp a b)) a aa)
 
 parseCase::Parser (Expr Name)
 parseCase = do symbol "case"
